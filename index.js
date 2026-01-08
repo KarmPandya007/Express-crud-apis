@@ -12,6 +12,7 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
+
 app.use(express.json()); //Global Middleware for parsing JSON data
 
 await connectDB();
