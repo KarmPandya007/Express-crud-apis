@@ -1,74 +1,60 @@
-import express from 'express';
 import { Person } from '../models/Person.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
-export const getAllPersons = async (req, res) => {
-    try {
-        const allPersons = await Person.find()
-        res.status(200).json({ success: true, count: allPersons.length, allPersons })
-    } catch (err) {
-        res.send(err.message)
+export const getAllPersons = asyncHandler(async (req, res) => {
+    const allPersons = await Person.find();
+    res.status(200).json({ success: true, count: allPersons.length, allPersons });
+});
+
+export const getPersonById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const personData = await Person.findById(id);
+    if (!personData) {
+        const error = new Error("Person not found");
+        error.statusCode = 404;
+        throw error;
     }
-}
+    res.status(200).json({
+        success: true,
+        personData
+    });
+});
 
-export const getPersonById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const personData = await Person.findById(id);
-        res.status(200).json({
-            success: true,
-            personData
-        })
-        // console.log(personData)
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        })
+export const addPerson = asyncHandler(async (req, res) => {
+    const { name, age, email } = req.body;
+    const newPerson = new Person({
+        name,
+        age,
+        email
+    });
+    await newPerson.save();
+    res.status(201).json({ success: true, message: "Person Added", data: newPerson });
+});
+
+export const updatePersonById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { name, email, age } = req.body;
+    const personData = await Person.findOneAndUpdate({ _id: id }, { name, email, age }, { new: true });
+
+    if (!personData) {
+        const error = new Error("Person not found");
+        error.statusCode = 404;
+        throw error;
     }
-}
 
-export const addPerson = async (req, res) => {
-    try {
-        const { name, age, email } = req.body;
-        const newPerson = new Person({
-            name,
-            age,
-            email
-        })
-        await newPerson.save();
-        res.send("Person Added")
-        // console.log(newPerson)
-    } catch (err) {
-        res.send(err.message)
+    res.status(200).json({ success: true, message: "Person Data Updated", data: personData });
+});
+
+export const deletePersonById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const personData = await Person.findOneAndDelete({ _id: id });
+
+    if (!personData) {
+        const error = new Error("Person not found");
+        error.statusCode = 404;
+        throw error;
     }
-}
 
-export const updatePersonById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, email, age } = req.body;
-        const personData = await Person.findOneAndUpdate({ _id: id }, { name, email, age })
-
-        // await personData.save();
-
-        console.log(personData)
-        res.send("Person Data Updated")
-    } catch (err) {
-        res.send(err.message);
-    }
-}
-
-export const deletePersonById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const personData = await Person.findOneAndDelete({ _id: id })
-
-        // await personData.save();
-
-        console.log(personData)
-        res.send("Person Data Deleted");
-    } catch (err) {
-        res.send(err.message);
-    }
-}
+    res.status(200).json({ success: true, message: "Person Data Deleted" });
+});
 
