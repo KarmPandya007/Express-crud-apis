@@ -4,10 +4,14 @@ import personRouter from "./routes/personRouter.js";
 import cors from "cors";
 import dotenv from 'dotenv';
 import { errorHandler } from "./middleware/errorHandler.js";
+import { limiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
 
 const app = express();
+
+// Apply rate limiter to all routes
+app.use(limiter);
 
 app.use(cors({
     origin: "http://localhost:3000", // or "*" to allow all
