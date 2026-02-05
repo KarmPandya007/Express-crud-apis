@@ -10,8 +10,7 @@ dotenv.config();
 
 const app = express();
 
-// Apply rate limiter to all routes
-app.use(limiter);
+
 
 app.use(cors({
     origin: "http://localhost:3000", // or "*" to allow all
@@ -20,6 +19,7 @@ app.use(cors({
 }));
 
 app.use(express.json()); //Global Middleware for parsing JSON data
+
 
 await connectDB();
 
